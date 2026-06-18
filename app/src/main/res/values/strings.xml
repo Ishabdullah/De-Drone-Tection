@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">De-Drone-Tection</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="detections">Detections</string>
+    <string name="map">Map</string>
+    <string name="settings">Settings</string>
+    <string name="ble_scan">BLE Scan</string>
+    <string name="wifi_scan">WiFi Scan</string>
+    <string name="acoustic_detection">Acoustic Detection</string>
+    <string name="network_mode">Network Mode</string>
+    <string name="simulation_mode">Simulation Mode</string>
+    <string name="threat_low">LOW</string>
+    <string name="threat_medium">MEDIUM</string>
+    <string name="threat_high">HIGH</string>
+    <string name="no_drones_detected">No drones detected</string>
+    <string name="drones_detected">Drones Detected</string>
+    <string name="scanning">Scanning…</string>
+    <string name="initializing">INITIALIZING SENSORS…</string>
+    <string name="sdr_status">SDR Status</string>
+    <string name="sdr_connected">SDR Connected</string>
+    <string name="sdr_disconnected">No SDR Detected</string>
+    <string name="enhanced_rf_mode">Enhanced RF Mode</string>
+    <string name="sdr_instructions">Connect an RTL-SDR dongle via USB-C to enable enhanced RF spectrum analysis for drone signal detection.</string>
+    <string name="possible_drone_sound">Possible Drone Sound Detected</string>
+    <string name="detection_from">Detected via %s</string>
+    <string name="distance_format">~%.0fm away</string>
+    <string name="rssi_format">RSSI: %d dBm</string>
+    <string name="location_format">Lat: %.6f, Lon: %.6f</string>
+    <string name="search_drones">Search drones…</string>
+    <string name="scan_interval">Scan Interval (ms)</string>
+    <string name="acoustic_sensitivity">Acoustic Sensitivity</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#FF0A0A0A</color>
+    <color name="surface">#FF1C1C1E</color>
+    <color name="surface_variant">#FF2C2C2E</color>
+    <color name="primary">#FFFF9500</color>
+    <color name="primary_variant">#FFFFB340</color>
+    <color name="on_primary">#FF000000</color>
+    <color name="alert">#FFFF3B30</color>
+    <color name="alert_variant">#FFFF6961</color>
+    <color name="success">#FF30D158</color>
+    <color name="on_background">#FFFFFFFF</color>
+    <color name="on_surface">#FFFFFFFF</color>
+    <color name="on_surface_variant">#FFB0B0B0</color>
+    <color name="scanning_pulse">#FF00FF88</color>
+    <color name="radar_line">#1AFF9500</color>
+    <color name="radar_sweep">#66FF9500</color>
+    <color name="icon_background">#FF0A0A0A</color>
+</resources>
