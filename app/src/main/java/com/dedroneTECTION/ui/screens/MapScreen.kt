@@ -1,14 +1,10 @@
 package com.dedroneTECTION.ui.screens
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.RectF
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -20,19 +16,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dedroneTECTION.model.DroneDetection
 import com.dedroneTECTION.model.ThreatLevel
 import com.dedroneTECTION.ui.theme.*
 import com.dedroneTECTION.viewmodel.MainViewModel
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.roundToInt
 
 @Composable
 fun MapScreen(
@@ -72,62 +66,97 @@ fun MapScreen(
     }
 
     var zoom by remember { mutableFloatStateOf(14f) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
+    var panOffset by remember { mutableStateOf(Offset.Zero) }
 
-    Box(modifier = modifier.fillMaxSize().background(Background)) {
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTransformGestures { _, pan, zoomChange, _ ->
-                        zoom = (zoom * zoomChange).coerceIn(8f, 20f)
-                        offset = Offset(offset.x + pan.x, offset.y + pan.y)
-                    }
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Background)
+            .pointerInput(Unit) {
+                detectTransformGestures { _, pan, zoomChange, _ ->
+                    zoom = (zoom * zoomChange).coerceIn(8f, 20f)
+                    panOffset = Offset(panOffset.x + pan.x, panOffset.y + pan.y)
                 }
-        ) {
-            val centerLat = userLocation.first
-            val centerLon = userLocation.second
-            val metersPerPixel = 156543.03 * cos(Math.toRadians(centerLat)) / Math.pow(2.0, zoom.toDouble())
+            }
+    ) {
+        val boxWidth = maxWidth
+        val boxHeight = maxHeight
 
-            drawGrid(centerLat, centerLon, metersPerPixel)
+        val centerLat = userLocation.first
+        val centerLon = userLocation.second
+        val metersPerPixel = 156543.03 * Math.cos(Math.toRadians(centerLat)) / Math.pow(2.0, zoom.toDouble())
+        val pxPerDegLon = 111320.0 * Math.cos(Math.toRadians(centerLat)) / metersPerPixel
+        val pxPerDegLat = 110540.0 / metersPerPixel
 
-            val userScreenX = size.width / 2 + offset.x
-            val userScreenY = size.height / 2 + offset.y
-            drawCircle(
-                color = Color(0xFF2196F3),
-                radius = 10.dp.toPx(),
-                center = Offset(userScreenX, userScreenY)
+        val halfW = boxWidth.value / 2f
+        val halfH = boxHeight.value / 2f
+
+        for (i in 0..20) {
+            val xPos = ((i * 200f + panOffset.x) % (20 * 200f))
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset(xPos.roundToInt(), 0) }
+                    .width(1.dp)
+                    .fillMaxHeight()
+                    .background(gridLineColor)
             )
-            drawCircle(
-                color = Color(0xFF2196F3).copy(alpha = 0.3f),
-                radius = 20.dp.toPx(),
-                center = Offset(userScreenX, userScreenY)
+        }
+        for (i in 0..25) {
+            val yPos = ((i * 200f + panOffset.y) % (25 * 200f))
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset(0, yPos.roundToInt()) }
+                    .height(1.dp)
+                    .fillMaxWidth()
+                    .background(gridLineColor)
             )
+        }
 
-            detections.forEach { detection ->
-                if (detection.latitude != null && detection.longitude != null) {
-                    val dLat = detection.latitude - centerLat
-                    val dLon = detection.longitude - centerLon
-                    val screenX = (dLon * 111320 * cos(Math.toRadians(centerLat)) / metersPerPixel + size.width / 2 + offset.x).toFloat()
-                    val screenY = (-dLat * 110540 / metersPerPixel + size.height / 2 + offset.y).toFloat()
+        val userScreenX = halfW + panOffset.x
+        val userScreenY = halfH + panOffset.y
 
-                    if (screenX in -50f..size.width + 50f && screenY in -50f..size.height + 50f) {
-                        val color = when (detection.threatLevel) {
-                            ThreatLevel.HIGH -> Alert
-                            ThreatLevel.MEDIUM -> Primary
-                            ThreatLevel.LOW -> Success
-                        }
-                        drawCircle(
-                            color = color.copy(alpha = 0.3f),
-                            radius = 16.dp.toPx(),
-                            center = Offset(screenX, screenY)
-                        )
-                        drawCircle(
-                            color = color,
-                            radius = 8.dp.toPx(),
-                            center = Offset(screenX, screenY)
-                        )
+        Box(
+            modifier = Modifier
+                .offset { IntOffset((userScreenX - 24).roundToInt(), (userScreenY - 24).roundToInt()) }
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(Color(0xFF2196F3).copy(alpha = 0.2f))
+        )
+        Box(
+            modifier = Modifier
+                .offset { IntOffset((userScreenX - 10).roundToInt(), (userScreenY - 10).roundToInt()) }
+                .size(20.dp)
+                .clip(CircleShape)
+                .background(Color(0xFF2196F3))
+        )
+
+        detections.forEach { detection ->
+            if (detection.latitude != null && detection.longitude != null) {
+                val dLat = detection.latitude - centerLat
+                val dLon = detection.longitude - centerLon
+                val sx = (dLon * pxPerDegLon + halfW + panOffset.x).roundToInt()
+                val sy = (-dLat * pxPerDegLat + halfH + panOffset.y).roundToInt()
+
+                if (sx in -60..boxWidth.value.roundToInt() + 60 && sy in -60..boxHeight.value.roundToInt() + 60) {
+                    val color = when (detection.threatLevel) {
+                        ThreatLevel.HIGH -> Alert
+                        ThreatLevel.MEDIUM -> Primary
+                        ThreatLevel.LOW -> Success
                     }
+                    Box(
+                        modifier = Modifier
+                            .offset { IntOffset(sx - 20, sy - 20) }
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(color.copy(alpha = 0.2f))
+                    )
+                    Box(
+                        modifier = Modifier
+                            .offset { IntOffset(sx - 8, sy - 8) }
+                            .size(16.dp)
+                            .clip(CircleShape)
+                            .background(color)
+                    )
                 }
             }
         }
@@ -145,9 +174,7 @@ fun MapScreen(
                 fontFamily = FontFamily.Monospace,
                 letterSpacing = 2.sp
             )
-
             Spacer(modifier = Modifier.height(8.dp))
-
             Box(
                 modifier = Modifier
                     .background(Surface.copy(alpha = 0.9f), RoundedCornerShape(8.dp))
@@ -170,10 +197,10 @@ fun MapScreen(
                 .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            MapLegendItem(color = Alert, label = "HIGH threat")
-            MapLegendItem(color = Primary, label = "MEDIUM threat")
-            MapLegendItem(color = Success, label = "LOW threat")
-            MapLegendItem(color = Color(0xFF2196F3), label = "Your location")
+            LegendRow(color = Alert, label = "HIGH threat")
+            LegendRow(color = Primary, label = "MEDIUM threat")
+            LegendRow(color = Success, label = "LOW threat")
+            LegendRow(color = Color(0xFF2196F3), label = "Your location")
         }
 
         Column(
@@ -202,8 +229,10 @@ fun MapScreen(
     }
 }
 
+private val gridLineColor = Color(0xFF1C1C1E)
+
 @Composable
-private fun MapLegendItem(color: Color, label: String) {
+private fun LegendRow(color: Color, label: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -219,28 +248,6 @@ private fun MapLegendItem(color: Color, label: String) {
             color = OnSurfaceVariant,
             fontSize = 9.sp,
             fontFamily = FontFamily.Monospace
-        )
-    }
-}
-
-private fun DrawScope.drawGrid(centerLat: Double, centerLon: Double, metersPerPixel: Double) {
-    val gridColor = Color(0xFF2C2C2E)
-    val gridSpacing = 50.dp.toPx()
-
-    for (x in 0..size.width.toInt() step gridSpacing.toInt()) {
-        drawLine(
-            color = gridColor,
-            start = Offset(x.toFloat(), 0f),
-            end = Offset(x.toFloat(), size.height),
-            strokeWidth = 0.5.dp.toPx()
-        )
-    }
-    for (y in 0..size.height.toInt() step gridSpacing.toInt()) {
-        drawLine(
-            color = gridColor,
-            start = Offset(0f, y.toFloat()),
-            end = Offset(size.width, y.toFloat()),
-            strokeWidth = 0.5.dp.toPx()
         )
     }
 }

@@ -26,7 +26,7 @@
     <string name="detection_from">Detected via %s</string>
     <string name="distance_format">~%.0fm away</string>
     <string name="rssi_format">RSSI: %d dBm</string>
-    <string name="location_format">Lat: %.6f, Lon: %.6f</string>
+    <string name="location_format" formatted="false">Lat: %.6f, Lon: %.6f</string>
     <string name="search_drones">Search drones…</string>
     <string name="scan_interval">Scan Interval (ms)</string>
     <string name="acoustic_sensitivity">Acoustic Sensitivity</string>
