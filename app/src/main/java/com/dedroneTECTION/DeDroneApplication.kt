@@ -9,11 +9,15 @@ import com.dedroneTECTION.util.DeviceUtils
 class DeDroneApplication : Application() {
 
     val detectionRepository = DetectionRepository()
-    val firebaseRepository = FirebaseRepository()
+    val firebaseRepository by lazy { FirebaseRepository() }
 
     val deviceHash: String by lazy {
-        val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-        DeviceUtils.generateDeviceHash(androidId)
+        try {
+            val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            DeviceUtils.generateDeviceHash(androidId ?: "unknown")
+        } catch (e: Exception) {
+            "default-device-hash"
+        }
     }
 
     override fun onCreate() {
