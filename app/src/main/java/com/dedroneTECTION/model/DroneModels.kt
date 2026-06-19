@@ -1,7 +1,6 @@
 package com.dedroneTECTION.model
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+
 
 enum class DetectionMethod {
     BLE,

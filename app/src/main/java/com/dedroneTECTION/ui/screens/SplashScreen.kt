@@ -19,16 +19,16 @@ fun SplashScreen(
     onSplashComplete: () -> Unit
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "splash")
-    val dotCount by infiniteTransition.animateInt(
-        initialValue = 0,
-        targetValue = 3,
+    val dotCount by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 3f,
         animationSpec = infiniteRepeatable(
             animation = tween(1200),
             repeatMode = RepeatMode.Restart
         ),
         label = "dots"
     )
-    val dots = ".".repeat(dotCount)
+    val dots = ".".repeat(dotCount.toInt())
 
     LaunchedEffect(Unit) {
         kotlinx.coroutines.delay(3000)

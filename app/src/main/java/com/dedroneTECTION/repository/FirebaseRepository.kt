@@ -22,7 +22,7 @@ class FirebaseRepository {
         }
     }
 
-    suspend fun getRecentDetections(limit: Long = 50): List<Map<String, Any?>> {
+    suspend fun getRecentDetections(limit: Int = 50): List<Map<String, Any?>> {
         return try {
             val snapshot = detectionsRef
                 .orderByChild("timestamp")

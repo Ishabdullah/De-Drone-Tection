@@ -117,7 +117,7 @@ class RemoteIDParser {
                 ((data[9].toInt() and 0xFF) shr 1)
         val latitude = (latRaw - 90000000) * 1e-7
 
-        val lonRaw = ((data[9].toInt() and 0x01) << 23) or
+        val lonRaw = ((data[9].toInt() and 0x01) shl 23) or
                 ((data[10].toInt() and 0xFF) shl 15) or
                 ((data[11].toInt() and 0xFF) shl 7) or
                 ((data[12].toInt() and 0xFF) shr 1)
